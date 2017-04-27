@@ -14,6 +14,9 @@ square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI') for cs in ('123', 
 unitlist = row_units + column_units + square_units
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s], [])) - set([s])) for s in boxes)
+# for diagonal sudoku
+diagonal_units =[[r+cols[i] for i, r in enumerate(rows)], [t[0]+t[1] for t in zip(rows, cols[::-1])]]
+[[peers[s].update(set(du)- set([s])) for s in du] for du in diagonal_units]
 
 def display(values):
     """
@@ -63,7 +66,7 @@ def remove_twin_values(values, arr, twin_d):
         if s_value != s_new_value:
             changed= True
             new_value= "".join(s_new_value)
-            print("!!! remove_twin_values removevd: %s: %s => %s, twin=%s" % (s, values[s], new_value, twin_d))
+            #print("!!! remove_twin_values removevd: %s: %s => %s, twin=%s" % (s, values[s], new_value, twin_d))
             values[s] = new_value
     return values, changed
 
@@ -85,6 +88,7 @@ def naked_twins(values):
                 if k not in twins:
                     for p in peers[k]:
                         if values[p] == v:        # we have twin
+                            changed = False
                             twins.append(p)       # so do not  process it again
                             if k[0] == p[0]:      # same rows
                                 values, changed = remove_twin_values(values, row_units[rows.index(k[0])], set(v))
@@ -150,15 +154,21 @@ def reduce_puzzle(values):
 
 def search(values):
     values = reduce_puzzle(values)
+    if not values:
+        return False
     if all(len(v) == 1 for v in values.values()):
-        return values               # we got it
-    n, s = min((len(v), k) for k, v in values.items() if len(v) > 1)
-    for d in values[s]:
-        copy_of_values = values.copy()
-        copy_of_values[s] = d
-        attempt = search(copy_of_values)
-        if attempt:
-            return attempt
+        return values
+    unsolved = {k: v for k, v in values.items() if len(v) > 1}
+    if unsolved:
+        sorted_unsolved = sorted(unsolved.items(), key=lambda x: len(x[1]))
+        for s, v in sorted_unsolved:
+            for d in v:
+                copy_of_values = values.copy()
+                copy_of_values[s] = d
+                attempt = search(copy_of_values)
+                if attempt:
+                    return attempt
+        #print("unsolved=", unsolved)
 
 def solve(grid):
     """
@@ -171,7 +181,7 @@ def solve(grid):
     """
     assert len(grid) == 81
     values = grid_values(grid)
-    display(values)
+    #display(values)
     values = search(values)
     return values
 
@@ -179,8 +189,10 @@ if __name__ == '__main__':
     #diag_sudoku_grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
     values = solve(diag_sudoku_grid)
-    display(values)
-
+    if values:
+        display(values)
+    else:
+        print("Cannot find solution for %s" % diag_sudoku_grid)
     try:
         from visualize import visualize_assignments
         visualize_assignments(assignments)

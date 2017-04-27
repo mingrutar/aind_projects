@@ -1,3 +1,5 @@
+import sys, os, os.path
+sys.path.append(os.path.dirname(__file__))
 import solution
 import unittest
 
