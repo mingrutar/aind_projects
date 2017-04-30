@@ -1,3 +1,4 @@
+#! /bin/python
 assignments = []
 
 rows = 'ABCDEFGHI'
