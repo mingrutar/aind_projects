@@ -40,7 +40,7 @@ def grid_values(grid):
             Keys: The boxes, e.g., 'A1'
             Values: The value in each box, e.g., '8'. If the box has no value, then the value will be '123456789'.
     """
-    return {boxes[i] : g if g != '.' else digits for i, g in enumerate(grid)}
+    return {boxes[i] : digits if g=='.' or g=='0' else g for i, g in enumerate(grid)}
 
 def assign_value(values, box, value):
     """
@@ -146,10 +146,14 @@ def reduce_puzzle(values):
     stalled = False
     while not stalled:
         values = naked_twins(values)
+        if all(len(v) == 1 for v in values.values()):
+            break
         values = eliminate(values)
         values, stalled = only_choice(values)
         if '' in values.values():
             return False
+        if all(len(v) == 1 for v in values.values()):
+            break
     return values
 
 def search(values):
@@ -168,7 +172,7 @@ def search(values):
                 attempt = search(copy_of_values)
                 if attempt:
                     return attempt
-        #print("unsolved=", unsolved)
+        print("unsolved=", unsolved)
 
 def solve(grid):
     """
@@ -186,18 +190,31 @@ def solve(grid):
     return values
 
 if __name__ == '__main__':
-    #diag_sudoku_grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'
-    diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
-    values = solve(diag_sudoku_grid)
-    if values:
-        display(values)
-    else:
-        print("Cannot find solution for %s" % diag_sudoku_grid)
-    try:
-        from visualize import visualize_assignments
-        visualize_assignments(assignments)
+    diag_sudoku_grids = ['000007000090001000000045006000020000036000410500000809000000004000018000081500032']
+    diag_sudoku_grids2 = ['2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3',
+                    '003020600900305001001806400008102900700000008006708200002609500800203009005010300',
+                    '000260701680070090190004500820100040004602900050003028009300074040050036703018000',
+                    '000100702030950000001002003590000301020000070703000098800200100000085060605009000',
+                    '094000130000000000000076002080010000032000000000200060000050400000008007006304008',
+                    '000000000000942080160000029000000008906000001400250000004000000020008090050000700',
+                    '052470000060000000000008010400000009700950000020040030000800090000003706000091000',
+                    '090000000001006000060080070300000010000039000000050002170400028000003000086000057',
+                    '000005000020004010030080020000008400800600000090010705006000000950003060003000001',
+                    '500068000000000060042050000000800900001000040903000620700001009004200003080000000',
+                    '000007000090001000000045006000020000036000410500000809000000004000018000081500032' ]
 
-    except SystemExit:
-        pass
-    except:
-        print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
+    for dsg in diag_sudoku_grids:
+        print('sukodu: %s' % dsg)
+        values = solve(dsg)
+        if values:
+            display(values)
+        else:
+            print("Cannot find solution for %s" % dsg)
+        try:
+            from visualize import visualize_assignments
+            visualize_assignments(assignments)
+
+        except SystemExit:
+            pass
+        except:
+            print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
