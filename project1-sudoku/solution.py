@@ -47,7 +47,6 @@ def assign_value(values, box, value):
     Please use this function to update your values dictionary!
     Assigns a value to a given box. If it updates the board record it.
     """
-
     # Don't waste memory appending actions that don't actually change any values
     if values[box] == value:
         return values
@@ -58,15 +57,14 @@ def assign_value(values, box, value):
     return values
 
 def remove_twin_values(values, arr, twin_d):
-    unsolved = [k for k in arr if len(values[k]) >2]
+    unsolved = [k for k in arr if len(values[k]) > 2]
     changed = False
     for s in unsolved:
         s_value = set(values[s])
         s_new_value = s_value - twin_d
         if s_value != s_new_value:
-            changed= True
-            new_value= "".join(s_new_value)
-            #print("!!! remove_twin_values removevd: %s: %s => %s, twin=%s" % (s, values[s], new_value, twin_d))
+            changed = True
+            new_value = "".join(sorted(list(s_new_value)))
             values[s] = new_value
     return values, changed
 
@@ -168,7 +166,6 @@ def search(values):
                 attempt = search(copy_of_values)
                 if attempt:
                     return attempt
-        #print("unsolved=", unsolved)
 
 def solve(grid):
     """
@@ -181,12 +178,10 @@ def solve(grid):
     """
     assert len(grid) == 81
     values = grid_values(grid)
-    #display(values)
     values = search(values)
     return values
 
 if __name__ == '__main__':
-    #diag_sudoku_grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
     values = solve(diag_sudoku_grid)
     if values:
