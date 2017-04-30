@@ -66,7 +66,7 @@ def remove_twin_values(values, arr, twin_d):
         s_new_value = s_value - twin_d
         if s_value != s_new_value:
             changed= True
-            new_value= "".join(s_new_value)
+            new_value= "".join(sorted(list(s_new_value)))
             #print("!!! remove_twin_values removevd: %s: %s => %s, twin=%s" % (s, values[s], new_value, twin_d))
             values[s] = new_value
     return values, changed
